@@ -14,16 +14,6 @@
 
 **TravelBuddy** is a next-gen AI travel planner that creates fully personalized travel itineraries through natural language conversations. Built using a modular, multi-agent architecture, semantic search, and real-time travel APIs, it offers a unified, intelligent travel planning experience.
 
-## Project URLs
-- Code Labs: [Codelabs Documentation](https://codelabs-preview.appspot.com/?file_id=1tutswOpFN6G73kNlOOBUUXkxT-XiGBHQ0f_FO67wKHs#0)
-- Application: [Front End](https://travelai.me/)
-- Swagger: [Swagger](http://34.45.163.161:8000/docs)
-- Airflow: [Airflow](http://159.89.95.178:8080/home)
-- Live Demo : [Travel AI](https://travelai.me/)
-- Walkthrough Video : [Application Walkthrough](https://drive.google.com/drive/folders/1898HGutXjQIxwx3OVnr_Yvx9Uq_SKAE1?usp=sharing)
-- Github Tasks: [GitHub Issues and Tasks](https://github.com/DAMG7245/Travel_Buddy/issues?q=is%3Aissue%20state%3Aclosed&page=1)
----
-
 ##  Key Features
 
 -  **Multi-Agent Architecture** – Dedicated AI agents for flights, hotels, weather, events, safety, and itinerary creation.
