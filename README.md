@@ -370,7 +370,7 @@ Travel_Buddy/
 
 ## 👥 Contributors
 
-- Sai Priya Veerabomma
+- Shiva Bhargav Bhuvanam
 ---
 
 ## 📜 License
