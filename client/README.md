@@ -1,54 +1,57 @@
-# React + TypeScript + Vite
+# TravelBuddy Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The React frontend for TravelBuddy: a chat interface for planning trips, with maps, weather and flight search.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui (Radix), TanStack Query, React Router, Auth0 and the Google Maps JavaScript API.
 
-## Expanding the ESLint configuration
+## Pages
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Route | Page | Sign-in required |
+|---|---|---|
+| `/` | Landing page | No |
+| `/waitlist` | Waitlist | No |
+| `/auth-callback` | Auth0 sign-in callback | No |
+| `/home` | Home | Yes |
+| `/chat/:id` | Chat with the travel agents | Yes |
+| `/chatmain/:id` | Main chat view | Yes |
+| `/chatmaps` | Chat with a map | Yes |
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Settings
+
+Create `client/.env`:
+
+```
+VITE_AUTH0_DOMAIN=your-tenant.auth0.com
+VITE_AUTH0_CLIENT_ID=your-auth0-client-id
+VITE_AUTH0_REDIRECT_URI=http://localhost:3000/auth-callback
+VITE_AUTH0_AUDIENCE=your-api-identifier
+VITE_BASE_URL=http://localhost:8000
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-key
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Run
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+cd client
+npm install
+npm run dev
+```
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+The app runs at http://localhost:3000 and forwards `/api` requests to the backend at http://localhost:8000, so start the backend too (see the main [README](../README.md)).
+
+Other scripts: `npm run build`, `npm run preview`, `npm run lint`.
+
+## Layout
+
+```
+src/
+├── pages/        Landing, home, chat, map chat, flight search, waitlist
+├── components/   Chat, map, weather, navigation and shadcn/ui components
+├── api/          Backend calls (chat and users)
+├── auth/         Auth0 provider and protected routes
+├── hooks/        Chat, audio recording, auto-scroll and other hooks
+├── db/           IndexedDB storage
+└── AppRouter.tsx Routes
 ```
