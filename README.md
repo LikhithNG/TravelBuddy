@@ -195,8 +195,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/Travel_Buddy.git
-cd Travel_Buddy
+git clone https://github.com/LikhithNG/TravelBuddy.git
+cd TravelBuddy
 ```
 
 ### 2. Set Up Environment Variables
