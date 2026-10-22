@@ -1,125 +1,227 @@
-# TravelBuddy – AI Travel Planning Assistant
+# 🌍 TravelBuddy – AI-Powered Travel Planning Assistant
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React_18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![LangGraph](https://img.shields.io/badge/Agents-LangGraph-purple.svg)](https://github.com/langchain-ai/langgraph)
-[![OpenAI](https://img.shields.io/badge/LLM-GPT--4o-412991.svg)](https://openai.com/)
-[![MCP](https://img.shields.io/badge/Weather-MCP_server-orange.svg)](https://modelcontextprotocol.io/)
-[![Snowflake](https://img.shields.io/badge/Flight_data-Snowflake-29b5e8.svg)](https://www.snowflake.com/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2CA5E0?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.68.0+-00a393.svg)](https://fastapi.tiangolo.com/)
+[![React.js](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react&logoColor=white)](https://react.dev/)
+[![Docker](https://img.shields.io/badge/Docker-20.10.8+-blue.svg)](https://www.docker.com/)
+[![LLM Agents](https://img.shields.io/badge/Agents-LangGraph%20%2B%20GPT--4o-purple.svg)](https://github.com/langchain-ai/langgraph)
+[![MCP](https://img.shields.io/badge/Weather-MCP%20Server-orange.svg)](https://modelcontextprotocol.io/)
+[![Data Warehouse](https://img.shields.io/badge/Data%20Analytics-Snowflake-29b5e8.svg)](https://www.snowflake.com/)
+[![OpenAI](https://img.shields.io/badge/LLM-OpenAI-blueviolet.svg)](https://openai.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-Codelabs-blue.svg)](https://codelabs-preview.appspot.com/?file_id=1kMzJ_qRJrDknPFatF1raPvsoJUatl_-tfJuICo7p4EM#0)
 
-TravelBuddy plans trips through a chat. You describe where and when you want to go, and a team of AI agents finds flights, hotels, restaurants and attractions, checks the weather and travel advisories, and puts it together into an itinerary.
+**TravelBuddy** is a next-gen AI travel planner that builds personalized itineraries through natural conversation. Just tell it where you want to go: a team of specialized AI agents finds flights, hotels, restaurants and attractions, checks the weather and travel advisories, and brings everything together into one plan, all in a single chat.
 
-## At a Glance
+## ✨ Key Features
 
-| | |
+- 🤖 **Multi-Agent Architecture** – A root agent hands each request to the right specialist: planning, pre-trip preparation or destination discovery.
+- 🧠 **Smart Intent Routing** – Fast keyword rules catch common requests instantly, and GPT-4o classifies everything else.
+- 🌐 **Real-Time Integrations** – Live data from Amadeus, Google Places, Google Search, OpenWeather and Skyscanner.
+- 🌦️ **Weather over MCP** – A Model Context Protocol server answers weather questions for one city or several at once.
+- ❄️ **Snowflake Flight Analytics** – Flight fares flow through S3 and Airflow into Snowflake for search and price analysis.
+- 🗺️ **Auto-Generated Itineraries** – End-to-end travel plans, exportable as PDFs (coming soon).
+- 🔐 **Secure Accounts** – Auth0 sign-in, with every conversation saved so you can pick up where you left off.
+
+## 📊 By the Numbers
+
+| Component | Count |
 |---|---|
-| Specialist agents in the graph | 3 (planning, pre-travel, explore), behind 1 routing agent |
-| Planning agent tools | 5 (flights, hotels, restaurants, attractions, itinerary) |
-| Weather MCP tools | 2 (`get_weather`, `get_current_weather`) |
-| REST endpoints | 20 across the backend and the flight service |
-| PostgreSQL tables | 3 (`users`, `chat_sessions`, `chat_messages`) |
-| Docker Compose services | 3 (backend, frontend, weather MCP server) |
+| Specialist agents behind the root agent | 3 |
+| Function-calling tools on the planning agent | 5 |
+| Weather MCP tools | 2 |
+| REST endpoints (backend + flight service) | 20 |
+| PostgreSQL tables | 3 |
+| Docker Compose services | 3 |
 
-## How It Works
+---
+## 🧭 Project Overview
 
-1. The React app sends your message to `POST /api/llm/ask-question`.
-2. The **root agent** (a LangGraph state graph) decides who handles it. Keyword rules catch flights, hotels, food, attractions, itineraries and packing; anything else goes to GPT-4o to classify.
-3. Weather questions are answered right away through the weather MCP server, for one city or several at once, without calling the other agents.
-4. Everything else goes to one specialist agent, which calls its tools and returns the answer.
-5. Chat sessions and messages are stored in PostgreSQL through the chat-history endpoints, so past chats can be reopened.
+### User Interaction Flow
+1. Start a conversation with TravelBuddy.
+2. Describe your travel plans, preferences or questions.
+3. The root agent routes your request to the right specialist agent.
+4. Agents fetch live flights, hotels, places and weather.
+5. The itinerary tool assembles everything into a plan.
+6. Review your itinerary and keep chatting to adjust it.
 
-### Agents
+## 🧩 Core Features
 
-| Agent | Handles | Tools and data |
-|---|---|---|
-| `root_agent` | Routing every message, answering weather questions | Keyword rules, GPT-4o fallback, weather MCP |
-| `planning_agent` | Flights, hotels, restaurants, attractions, full itineraries | Amadeus (flights, hotels), Google Places, itinerary builder |
-| `pre_travel_agent` | Visas, health, storms, travel advisories, packing | Google Custom Search |
-| `explore_agent` | Destination ideas | Place suggestions |
+### 1. Multi-Agent Architecture
+- Specialized agents for planning, pre-trip preparation and destination discovery
+- A LangGraph root agent coordinates them and answers weather questions directly
 
-### Flight Data Pipeline
+### 2. Intent Understanding & Personalization
+- Keyword rules route common requests (flights, hotels, food, attractions, packing) with no LLM call
+- GPT-4o handles open-ended requests and tailors suggestions to your interests
 
-The flight service fetches fares from the Skyscanner API (through RapidAPI), uploads daily and monthly JSON files to S3, and triggers the Airflow DAG `load_to_snowflake`. The backend then reads the loaded fares from Snowflake for `/api/flights/search` and `/api/flights/analysis`.
+### 3. Real-Time Integrations
+- Connected to Amadeus (flights, hotels), Google Places (restaurants, attractions), Google Custom Search (advisories), OpenWeather and Skyscanner
 
-```
-Skyscanner (RapidAPI) → flight_service → S3 → Airflow DAG → Snowflake → backend /api/flights
-```
+### 4. Intelligent Itinerary Generation
+- Combines results from every tool into one plan
+- Delivered as structured JSON, with PDF export coming soon
 
-### Diagrams
+### 5. Travel Analytics
+- Flight fare history stored in Snowflake
+- Price analysis for any route and date through `/api/flights/analysis`
 
-**Agent flow**
+---
+## 🔬 Methodology
+
+### Data Gathering
+- APIs: Amadeus, Google Places, Google Custom Search, OpenWeather, Skyscanner (RapidAPI)
+- Responses are normalized and validated as they come in
+
+### Agentic Execution
+- `root_agent` receives every message
+- Delegates to:
+  - `planning_agent` (flights, hotels, restaurants, attractions, itinerary)
+  - `pre_travel_agent` (visas, health, storms, travel advisories, packing)
+  - `explore_agent` (destination ideas)
+  - Weather MCP server (current weather and forecasts)
+
+### Itinerary Assembly
+- Collects outputs from the planning tools
+- Passes them to the itinerary tool
+- Returns the final plan as JSON
+
+### Challenges
+
+- Travel planning is scattered across many sites and apps
+- Most tools don't understand what a traveler actually wants
+- Building an itinerary by hand takes hours
+- Weather and travel advisories are rarely part of the plan
+
+### Opportunities
+
+- Natural language understanding of travel preferences
+- Intent-based recommendations instead of keyword search
+- One unified travel experience on a single platform
+- Learning from user feedback to improve over time
+
+---
+
+## 🏗️ Architecture
+
+### Agent Flow
 ![TravelBuddy agent flow](https://github.com/user-attachments/assets/afd57572-3403-44e0-b285-9eb53e23ac75)
 
-**MCP flow**
+### MCP Flow
 ![Weather MCP flow](https://github.com/user-attachments/assets/9172176b-ae8e-42aa-885b-f9a7f0bf16ca)
 
-**User flow**
+### User Flow
 ![TravelBuddy user flow](https://github.com/user-attachments/assets/86233095-7990-4194-9c4f-5303fce3bd28)
 
-## API Endpoints
 
-**Backend (`server/`, port 8000)**
+## 🔄 Data Pipeline
 
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/api/llm/ask-question` | Send a chat message to the agent graph |
-| POST, GET | `/api/users/` | Create a user, get the signed-in user (Auth0 token required) |
-| PUT | `/api/users/` | Update the signed-in user |
-| POST, GET | `/api/user/chat-history` | Start a chat session, list sessions |
-| GET, DELETE | `/api/user/chat-history/{session_id}` | Get or delete one session |
-| POST, GET | `/api/user/chat-history/{session_id}/messages` | Add or list messages in a session |
-| GET | `/api/maps/geocode` | Turn an address into coordinates (Google Maps) |
-| GET | `/api/flights/search` | Fares for a route and date, from Snowflake |
-| GET | `/api/flights/analysis` | Price summary for a route and date, from Snowflake |
-| GET | `/api/flights/test` | Sample rows from the flights table |
-| POST | `/api/chatmaps` | Placeholder that echoes the message back |
-| GET | `/` | Health check |
+1. **User Query Ingestion** – Requests start in the React frontend and reach the FastAPI backend.
+2. **Intent Parsing & Agent Dispatch** – `root_agent` works out the intent and activates the right agent (planning, pre-travel, explore or weather).
+3. **Real-Time API Retrieval** – Each agent calls external APIs (Amadeus, Google Places, OpenWeather and more) for live travel data.
+4. **Data Transformation** – Tool modules (`tools/*.py`) normalize and structure the responses.
+5. **Analytics Integration** – The flight service stages fares in S3, and an Airflow DAG (`load_to_snowflake`) loads them into Snowflake for trend analysis.
+6. **Itinerary Compilation** – The itinerary tool combines the outputs into a step-by-step travel plan.
+7. **Response Delivery** – Results return to the UI as structured JSON.
 
-**Flight service (`flight_service/`)**
+```
+Skyscanner (RapidAPI) → flight_service → S3 → Airflow DAG → Snowflake → /api/flights
+```
 
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/flights/` | Fetch fares, upload them to S3 and trigger the Airflow DAG |
-| GET | `/flights/search` | Same as above, with query parameters |
-| POST | `/flights/test` | Echo the request body to check parsing |
-| GET | `/` | Health check |
+---
+## 🔌 Microservices & APIs
 
-FastAPI serves interactive docs for each service at `/docs`.
+| Service              | Purpose                                   | Example Endpoint                            |
+|----------------------|-------------------------------------------|---------------------------------------------|
+| Agent Chat           | Send a message to the multi-agent system  | `POST /api/llm/ask-question`                |
+| Weather (MCP)        | Current weather and forecasts             | MCP tools `get_weather`, `get_current_weather` |
+| Flight Search        | Fares for a route and date                | `GET /api/flights/search`                   |
+| Flight Analysis      | Price trends for a route                  | `GET /api/flights/analysis`                 |
+| Flight Ingestion     | Fetch fares → S3 → Airflow → Snowflake    | `POST /flights/` (flight service)           |
+| Chat History         | Save and reopen conversations             | `GET /api/user/chat-history`                |
+| User Accounts        | Auth0-backed user profiles                | `GET /api/users/`                           |
+| Geocoding            | Turn an address into coordinates          | `GET /api/maps/geocode`                     |
 
-## Tech Stack
+Hotels, restaurants, attractions and itineraries are handled by the planning agent's tools behind `/api/llm/ask-question`. Full API docs are at `http://localhost:8000/docs` once the backend is running.
 
-- **Agents:** LangGraph, LangChain, OpenAI GPT-4o, Model Context Protocol
-- **Backend:** Python, FastAPI, SQLAlchemy, PostgreSQL, Auth0 (JWT)
-- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui (Radix), TanStack Query, Google Maps
-- **Data:** Snowflake, AWS S3, Apache Airflow
-- **External APIs:** Amadeus, Google Places, Google Custom Search, Google Maps Geocoding, OpenWeather, Skyscanner (RapidAPI)
-- **DevOps:** Docker, Docker Compose
 
-## Setup
+## 🛠️ Technology Stack
+
+### Backend
+- ![Python](https://img.shields.io/badge/Python-FFD43B?style=flat&logo=python&logoColor=blue)
+- ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)
+- ![JWT](https://img.shields.io/badge/JWT-black?style=flat&logo=JSON%20web%20tokens)
+- ![Auth0](https://img.shields.io/badge/Auth0-EB5424?style=flat&logo=auth0&logoColor=white)
+- ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)
+
+### Frontend
+- ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+- ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+- ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
+- ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
+- ![shadcn/ui](https://img.shields.io/badge/shadcn/ui-gray?style=flat&logo=vercel&logoColor=white)
+
+### AI/ML
+- ![OpenAI](https://img.shields.io/badge/OpenAI_GPT--4o-412991?style=flat&logo=openai&logoColor=white)
+- ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat&logo=langchain&logoColor=white)
+- ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat&logo=langchain&logoColor=white)
+- ![MCP](https://img.shields.io/badge/Model_Context_Protocol-FF7E00?style=flat)
+
+### Cloud & Data
+- ![AWS S3](https://img.shields.io/badge/AWS_S3-232F3E?style=flat&logo=amazon-aws&logoColor=white)
+- ![Snowflake](https://img.shields.io/badge/Snowflake-29b5e8?style=flat&logo=snowflake&logoColor=white)
+- ![Apache Airflow](https://img.shields.io/badge/Apache_Airflow-017CEE?style=flat&logo=Apache%20Airflow&logoColor=white)
+- ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=flat&logo=docker&logoColor=white)
+
+### Travel APIs
+- ![Amadeus](https://img.shields.io/badge/Amadeus_API-0071C5?style=flat&logo=airfrance&logoColor=white)
+- ![Google Maps](https://img.shields.io/badge/Google_Maps_&_Places-4285F4?style=flat&logo=googlemaps&logoColor=white)
+- ![OpenWeather](https://img.shields.io/badge/OpenWeather-FF7E00?style=flat&logo=OpenWeatherMap&logoColor=white)
+- ![Skyscanner](https://img.shields.io/badge/Skyscanner_(RapidAPI)-0770E3?style=flat&logo=skyscanner&logoColor=white)
+
+---
+
+## 🚀 TravelBuddy Setup Guide
 
 ### Prerequisites
 
-- Python 3.10+
-- Node.js 18+
-- PostgreSQL database
-- Snowflake account (only for the flight search and analysis endpoints)
-- API keys: OpenAI, Amadeus (client ID and secret), Google (API key and Custom Search engine ID), Google Maps, OpenWeather, Auth0
+1. **Python 3.10+**
+   - Verify with: `python --version` or `python3 --version`
 
-### 1. Clone the repository
+2. **Node.js and npm**
+   - Node.js 18+ and npm 8+ recommended
+   - Verify with: `node --version` and `npm --version`
+
+3. **API Keys**
+   - OpenAI API key
+   - OpenWeather API key
+   - Google API key and Custom Search engine ID
+   - Google Maps API key
+   - Amadeus API credentials (client ID and secret)
+   - Auth0 application (domain, client ID, audience)
+
+4. **Database**
+   - PostgreSQL database
+   - Snowflake account (for flight search and analytics)
+
+5. **Docker and Docker Compose** (optional)
+   - For containerized deployment
+
+### Setup Steps
+
+#### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/LikhithNG/TravelBuddy.git
 cd TravelBuddy
 ```
 
-### 2. Create a `.env` file in the project root
+#### 2. Set Up Environment Variables
+
+Create a `.env` file in the project root with your credentials:
 
 ```
-# PostgreSQL
+# PostgreSQL Database Configuration
 DB_HOST=your-postgres-host
 DB_PORT=5432
 DB_NAME=travelbuddy
@@ -127,116 +229,210 @@ DB_USER=your-username
 DB_PASSWORD=your-password
 DB_SSL_MODE=require
 
-# Auth0
-AUTH0_DOMAIN=your-tenant.auth0.com
-AUTH0_AUDIENCE=your-api-identifier
+# Auth0 Configuration
+AUTH0_DOMAIN=your-auth0-domain
+AUTH0_AUDIENCE=your-auth0-audience
 
-# LLM and travel APIs
-OPENAI_API_KEY=
-AMADEUS_CLIENT_ID=
-AMADEUS_CLIENT_SECRET=
-GOOGLE_API_KEY=
-GOOGLE_CSE_ID=
-GOOGLE_MAPS_API_KEY=
-OPENWEATHER_API_KEY=
+# API Keys
+OPENAI_API_KEY=your-openai-api-key
+OPENWEATHER_API_KEY=your-openweather-api-key
+GOOGLE_API_KEY=your-google-api-key
+GOOGLE_CSE_ID=your-google-custom-search-id
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+AMADEUS_CLIENT_ID=your-amadeus-client-id
+AMADEUS_CLIENT_SECRET=your-amadeus-client-secret
 
-# Snowflake (flight data)
-SNOWFLAKE_USER=
-SNOWFLAKE_PASSWORD=
-SNOWFLAKE_ACCOUNT=
-SNOWFLAKE_WAREHOUSE=
-SNOWFLAKE_DATABASE=
-SNOWFLAKE_SCHEMA=
+# Snowflake Configuration
+SNOWFLAKE_USER=your-snowflake-user
+SNOWFLAKE_PASSWORD=your-snowflake-password
+SNOWFLAKE_ACCOUNT=your-snowflake-account
+SNOWFLAKE_WAREHOUSE=your-snowflake-warehouse
+SNOWFLAKE_DATABASE=your-snowflake-database
+SNOWFLAKE_SCHEMA=your-snowflake-schema
 
-# Frontend
-VITE_AUTH0_DOMAIN=your-tenant.auth0.com
-VITE_AUTH0_CLIENT_ID=
+# Frontend (also copy these into client/.env for local runs)
+VITE_AUTH0_DOMAIN=your-auth0-domain
+VITE_AUTH0_CLIENT_ID=your-auth0-client-id
 VITE_AUTH0_REDIRECT_URI=http://localhost:3000/auth-callback
-VITE_AUTH0_AUDIENCE=your-api-identifier
+VITE_AUTH0_AUDIENCE=your-auth0-audience
 VITE_BASE_URL=http://localhost:8000
-VITE_GOOGLE_MAPS_API_KEY=
+VITE_GOOGLE_MAPS_API_KEY=your-google-maps-api-key
 
-# App
+# Other settings
 FRONTEND_URL=http://localhost:3000
 PORT=8000
 ```
 
-The backend and the weather MCP server read this root `.env`, and so does Docker Compose. For local runs, Vite only reads env files inside `client/`, so copy the `VITE_` lines into `client/.env` as well. The flight service has its own settings; see [flight_service/README.md](flight_service/README.md).
+The flight service uses its own settings. See [flight_service/README.md](flight_service/README.md).
 
-### 3. Install dependencies
+#### 3. Set Up Backend
 
+1. Create a Python virtual environment:
 ```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+python -m venv myenv
+```
+
+2. Activate the virtual environment:
+   - Windows: `myenv\Scripts\activate`
+   - macOS/Linux: `source myenv/bin/activate`
+
+3. Install backend dependencies:
+```bash
 pip install -r server/requirements.txt
 pip install -r weather-mcp/requirements.txt
-cd client && npm install && cd ..
+pip install -r flight_service/requirements.txt
 ```
 
-Then create the database tables once with the command in [server/README.md](server/README.md#run).
+4. Create the database tables (one time):
+```bash
+cd server
+python -c "from middlewares.conn_database import engine; from models.userModel import Base as UserBase; from models.llm_chat_historyModel import Base as ChatBase; UserBase.metadata.create_all(bind=engine); ChatBase.metadata.create_all(bind=engine)"
+cd ..
+```
 
-### 4. Run the services (one terminal each)
+#### 4. Set Up Frontend
 
 ```bash
-cd weather-mcp && CONTAINER_MODE=1 python simplified_mcp_server.py   # port 8080
-cd server && python main.py                                          # port 8000
-cd client && npm run dev                                             # port 3000
+cd client
+npm install
+cd ..
 ```
 
-Then open http://localhost:3000. The frontend forwards `/api` calls to the backend on port 8000.
+#### 5. Start the Services
 
-To run the flight data pipeline as well, start the flight service on its own port:
+**Option 1: Individual services (development)**
 
+1. Start the weather MCP server:
 ```bash
-cd flight_service && pip install -r requirements.txt && uvicorn app.main:app --port 8001
+cd weather-mcp
+CONTAINER_MODE=1 python simplified_mcp_server.py
 ```
 
-### Docker Compose
+2. Start the backend server (new terminal):
+```bash
+cd server
+python main.py
+```
 
-`docker-compose.yaml` defines the backend, frontend and weather MCP server. `weather-mcp/Dockerfile` is empty right now, so write it (or remove that service) before running:
+3. Start the flight service (new terminal, optional):
+```bash
+cd flight_service
+uvicorn app.main:app --port 8001
+```
+
+4. Start the frontend (new terminal):
+```bash
+cd client
+npm run dev
+```
+
+**Option 2: Docker Compose**
 
 ```bash
 docker compose up --build
 ```
 
-## Project Structure
+> Note: `weather-mcp/Dockerfile` is still empty, so add one (or remove that service from `docker-compose.yaml`) before using this option.
+
+#### 6. Access the Application
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000 (docs at `/docs`)
+- Weather MCP server: http://localhost:8080
+- Flight Service API: http://localhost:8001
+
+---
+
+## 📁 Project Structure
 
 ```
 TravelBuddy/
-├── client/              React + TypeScript frontend (chat, maps, flight search)
-├── server/              FastAPI backend
-│   ├── agents/          Root agent graph and its prompt
-│   ├── subagents/       Specialist agents (planning, pre_travel, explore, in_travel, post_travel)
-│   ├── miniagents/      Flight, hotel, restaurant, attraction and itinerary helpers
-│   ├── tools/           Amadeus, Google Places, web search, weather and memory tools
-│   ├── routes/          API routes
-│   ├── controllers/     Request handling
-│   ├── models/          SQLAlchemy and Pydantic models
-│   ├── middlewares/     Auth0, database and OpenAI connections
-│   └── evaluation/      Agent evaluation scaffold
-├── flight_service/      FastAPI service: Skyscanner → S3 → Airflow → Snowflake
-├── weather-mcp/         Weather MCP server (OpenWeather)
-├── POC/                 Early prototypes (CrewAI, Streamlit, Pinecone, Airflow DAGs)
-└── docker-compose.yaml
+├── client/                        # Frontend React application
+│   ├── src/
+│   │   ├── components/            # UI components
+│   │   │   ├── ChatComponent.tsx  # Main chat interface
+│   │   │   ├── MapComponent.tsx   # Map visualization
+│   │   │   └── WeatherDisplay.tsx # Weather display
+│   │   ├── pages/                 # Application pages
+│   │   ├── auth/                  # Auth0 provider and protected routes
+│   │   └── api/                   # API integration
+│   └── package.json               # Frontend dependencies
+│
+├── server/                        # Main backend server
+│   ├── agents/                    # AI agent system
+│   │   ├── rootAgent.py           # Main agent coordinator (LangGraph)
+│   │   └── prompt.py              # Agent prompts
+│   ├── subagents/                 # Specialized AI agents
+│   │   ├── planning/              # Flights, hotels, food, attractions, itinerary
+│   │   ├── pre_travel/            # Advisories and trip preparation
+│   │   ├── explore/               # Destination ideas
+│   │   ├── in_travel/             # During-trip help (not yet in the graph)
+│   │   └── post_travel/           # After-trip follow-up (not yet in the graph)
+│   ├── tools/                     # External API integrations
+│   │   ├── weather_tool.py        # Weather MCP client
+│   │   ├── flight_search.py       # Amadeus flight search
+│   │   └── hotel_search.py        # Amadeus hotel search
+│   ├── routes/                    # API routes
+│   ├── models/                    # Database models
+│   ├── main.py                    # Main server entry point
+│   └── requirements.txt           # Backend dependencies
+│
+├── flight_service/                # Flight data microservice
+│   ├── app/
+│   │   ├── main.py                # Flight service entry point
+│   │   ├── api/                   # Flight API endpoints
+│   │   └── services/              # Skyscanner, S3 and Airflow clients
+│   └── requirements.txt           # Flight service dependencies
+│
+├── weather-mcp/                   # Model Context Protocol server for weather
+│   ├── simplified_mcp_server.py   # MCP server implementation
+│   └── weather_agent.py           # Weather agent implementation
+│
+├── POC/                           # Early prototypes (CrewAI, Streamlit, Pinecone)
+├── docker-compose.yaml            # Docker configuration
+└── README.md                      # Project documentation
 ```
 
-## Known Gaps
+## 📝 Notes
 
-- `in_travel` and `post_travel` agents are written but not connected to the graph yet, so the router never reaches them.
-- `server/evaluation/test.py` comes from Google's ADK travel sample and its test data files are not in the repo, so it does not run.
-- `flight_service/app/config/settings.py` defaults to the original team's Airflow server and S3 bucket. Set `AIRFLOW_API_URL` and `S3_BUCKET_NAME` to your own.
-- The backend does not create its database tables on startup. See [server/README.md](server/README.md) for a one-line command that creates them.
-- Files with ` 2` in the name (for example `chatRoute 2.py`) are duplicate copies and are not used.
+1. **Weather MCP Server**
+   - The weather tool talks to the MCP server at `http://weather-mcp:8080` and falls back to `http://localhost:8080`
+   - Start the MCP server before the backend so weather questions work
 
-## Credits
+2. **Database Setup**
+   - Tables are not created on startup, so run the one-time command in step 3
+   - Verify database credentials in the `.env` file
 
-- Original author: Shiva Bhargav Bhuvanam ([shivabhargavbhuvanam/TravelBuddy](https://github.com/shivabhargavbhuvanam/TravelBuddy))
-- This copy is maintained by [Likhith Nagaralu Gurumurthy](https://github.com/LikhithNG)
+3. **Auth0 Setup**
+   - Create an Auth0 application and API in the Auth0 dashboard
+   - Add `http://localhost:3000/auth-callback` as an allowed callback URL
+   - Put the same domain and audience in both the backend and frontend settings
 
-## License
+4. **Flight Service**
+   - Set your own `S3_BUCKET_NAME` and `AIRFLOW_API_URL`; the defaults point at the original team's resources
 
-MIT License. See [LICENSE](LICENSE).
+5. **Work in Progress**
+   - The `in_travel` and `post_travel` agents are written but not yet connected to the root agent
+   - `server/evaluation/` holds an evaluation scaffold whose test data is not included yet
+   - Files ending in ` 2` (for example `chatRoute 2.py`) are duplicate copies and are not used
 
-## AI Usage Disclosure
+6. **Troubleshooting**
+   - API key errors: verify all keys in `.env`
+   - Database issues: check that the database is running and reachable
+   - MCP server issues: verify it is running on port 8080 and the OpenWeather key is set
 
-AI tools such as OpenAI GPT, LangChain and GitHub Copilot were used to build the agents, generate responses, scaffold code and tune prompts. Claude Code was used to rewrite this documentation.
+## 👥 Contributors
+
+- Shiva Bhargav Bhuvanam (original author, [shivabhargavbhuvanam/TravelBuddy](https://github.com/shivabhargavbhuvanam/TravelBuddy))
+- Maintained by [Likhith Nagaralu Gurumurthy](https://github.com/LikhithNG)
+
+---
+
+## 📜 License
+
+MIT License – Feel free to fork, extend, and build upon TravelBuddy.
+
+---
+## 🤖 AI Usage Disclosure
+
+AI tools such as OpenAI GPT, LangChain, and GitHub Copilot were used for implementing multi-agent travel assistance, generating responses, and supporting development tasks like code scaffolding and prompt tuning. Claude Code was used to polish this README.
