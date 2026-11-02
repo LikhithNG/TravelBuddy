@@ -1,3 +1,19 @@
+<!-- themed-header:start -->
+<a href="https://likhith-ng-portfolio.vercel.app/#proj-travelbuddy"><img src="docs/readme/hero.svg" width="100%" alt="TravelBuddy — Multi-Agent Travel Planner: Built a multi-agent travel planner on LangGraph and GPT-4o: a root agent routes each request to 1 of 3 specialist agents, by keyword rules first and an LLM as fallback."></a>
+
+<p align="center">
+  <a href="https://likhith-ng-portfolio.vercel.app/#proj-travelbuddy"><img alt="See it on my portfolio" src="https://img.shields.io/badge/see%20it%20on-my%20portfolio-a5a1f0?style=for-the-badge&labelColor=1d1e23"></a>
+  <a href="https://github.com/LikhithNG"><img alt="More of my work" src="https://img.shields.io/badge/more%20of%20my%20work-github.com%2FLikhithNG-5eead4?style=for-the-badge&labelColor=1d1e23"></a>
+</p>
+
+**At a glance**
+
+- Built a multi-agent travel planner on LangGraph and GPT-4o: a root agent routes each request to 1 of 3 specialist agents, by keyword rules first and an LLM as fallback.
+- Gave the planning agent 5 function-calling tools (flights, hotels, restaurants, attractions, itineraries) pulling live data from the Amadeus and Google Places APIs.
+
+---
+<!-- themed-header:end -->
+
 # 🌍 TravelBuddy – AI-Powered Travel Planning Assistant
 
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
